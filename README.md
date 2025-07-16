@@ -49,7 +49,6 @@ All In One
 - [Openweb UI](https://openwebui.com/)
 - [Librechat](https://www.librechat.ai/)
 
-
 ## Status
 
 This is a research project; UI and backend quality are definitely below my own standards, but everything should
@@ -78,26 +77,24 @@ of AI/LLM frameworks to understand better how LLM works and how it handles conte
 
 ## Run
 
-Web interface available via http://localhost:8080 
+Web interface available via http://localhost:8080
 
 ### Docker
 
-  docker run -p 8080:8080 ghcr.io/reddec/dreaming-bard:latest
+    docker run -p 8080:8080 ghcr.io/reddec/dreaming-bard:latest
 
 Do not to forget eventually persist `/data`.
-
 
 ### Docker Compose
 
 - Download [docker-compose.yaml](docker-compose.yaml)
 - In the directory: `docker compose up`
 
-
 ### CLI
 
 (download from releases or build it by yourself)
 
-  dreaming-bard server
+    dreaming-bard server
 
 
 <details>
@@ -157,33 +154,115 @@ Flags:
 
 </details>
 
+## Providers
+
+The recommended configuration is by environment variables. For CLI flags see references above.
+
 ### Ollama
 
-- Download model: `ollama pull qwen3:14b`
+- ENV: `PROVIDER_TYPE=ollama`
 
-```bash
-dreaming-bard server
-```
+**Notes:**
+
+This is the default provider. You have to download models before you can use them. For example: `ollama pull qwen3:14b`.
+
+**Configuration:**
+
+| ENV                            | Default value            | Description         |
+|--------------------------------|--------------------------|---------------------|
+| `PROVIDER_OLLAMA_URL`          | `http://localhost:11434` | Ollama URL          |
+| `PROVIDER_OLLAMA_MODEL`        | `qwen3:14b`              | Default model name  |
+| `PROVIDER_OLLAMA_TIMEOUT`      | `120s`                   | Timeout             |
+| `PROVIDER_OLLAMA_CONTEXT_SIZE` | `32768`                  | Context size        |
+| `PROVIDER_OLLAMA_MAX_TOKENS`   | `32768`                  | Max tokens          |
+| `PROVIDER_OLLAMA_TEMPERATURE`  | `0.6`                    | Temperature         |
+| `PROVIDER_OLLAMA_TOP_P`        | `0.95`                   | Top P               |
+| `PROVIDER_OLLAMA_TOP_K`        | `20`                     | Top K               |
+| `PROVIDER_OLLAMA_MIN_P`        | `0`                      | Min P               |
+| `PROVIDER_OLLAMA_NO_THINK`     | `false`                  | Disable thinking    |
 
 ### OpenAI
 
-(OpenRouter, DeepInfra, LiteLLM, etc... - any openai compatible provider, change by `--provider-openai-url`)
+- ENV: `PROVIDER_TYPE=openai`
 
-```bash
-dreaming-bard server --provider-type=openai
-```
+**Notes:**
+
+Any OpenAI-compatible provider can be used. This includes services like OpenRouter, DeepInfra, LiteLLM, etc. You can
+specify the provider's endpoint by setting the `PROVIDER_OPENAI_URL` environment variable.
+
+**Configuration:**
+
+| ENV                           | Default value               | Description        |
+|-------------------------------|-----------------------------|--------------------|
+| `PROVIDER_OPENAI_URL`         | `https://api.openai.com/v1` | OpenAI base URL    |
+| `PROVIDER_OPENAI_MODEL`       | `gpt-4o`                    | Default model name |
+| `PROVIDER_OPENAI_TOKEN`       |                             | OpenAI API token   |
+| `PROVIDER_OPENAI_TIMEOUT`     | `3m`                        | Timeout            |
+| `PROVIDER_OPENAI_MAX_TOKENS`  | `8192`                      | Max tokens         |
+| `PROVIDER_OPENAI_TEMPERATURE` | `0.8`                       | Temperature        |
+| `PROVIDER_OPENAI_TOP_P`       | `0.9`                       | Top P              |
+
+**Examples:**
+
+OpenAI
+
+    docker run -p 8080:8080 \
+      -e PROVIDER_TYPE=openai \
+      -e PROVIDER_OPENAI_TOKEN=sk-SUPER-SECRET-TOKEN \
+      ghcr.io/reddec/dreaming-bard:latest
+
+DeepInfra
+
+    docker run -p 8080:8080 \
+      -e PROVIDER_TYPE=openai \
+      -e PROVIDER_OPENAI_URL=https://api.deepinfra.com/v1/openai
+      -e PROVIDER_OPENAI_TOKEN=SUPER-SECRET-TOKEN \
+      ghcr.io/reddec/dreaming-bard:latest
+
+OpenRouter
+
+    docker run -p 8080:8080 \
+      -e PROVIDER_TYPE=openai \
+      -e PROVIDER_OPENAI_URL=https://openrouter.ai/api/v1
+      -e PROVIDER_OPENAI_TOKEN=SUPER-SECRET-TOKEN \
+      ghcr.io/reddec/dreaming-bard:latest
 
 ### Gemini
 
-AI Studio
+- ENV: `PROVIDER_TYPE=gemini`
 
-```bash
-dreaming-bard server --provider-type=gemini
-```
+**Notes:**
 
+This provider uses the Google AI (Gemini) API. You will need to obtain an API key from Google AI Studio.
+
+**Configuration:**
+
+| ENV                                           | Default value      | Description                 |
+|-----------------------------------------------|--------------------|-----------------------------|
+| `PROVIDER_GEMINI_MODEL`                       | `gemini-1.5-flash` | Default model name          |
+| `PROVIDER_GEMINI_TOKEN`                       |                    | Google AI API key           |
+| `PROVIDER_GEMINI_TIMEOUT`                     | `120s`             | Timeout                     |
+| `PROVIDER_GEMINI_MAX_TOKENS`                  | `8192`             | Max tokens                  |
+| `PROVIDER_GEMINI_TEMPERATURE`                 | `0.8`              | Temperature                 |
+| `PROVIDER_GEMINI_TOP_P`                       | `0.9`              | Top P                       |
+| `PROVIDER_GEMINI_TOP_K`                       | `40`               | Top K                       |
+| `PROVIDER_GEMINI_THRESHOLD_HARASSMENT`        | `NONE`             | Harassment threshold        |
+| `PROVIDER_GEMINI_THRESHOLD_HATE_SPEECH`       | `NONE`             | Hate speech threshold       |
+| `PROVIDER_GEMINI_THRESHOLD_SEXUALLY_EXPLICIT` | `NONE`             | Explicit content threshold  |
+| `PROVIDER_GEMINI_THRESHOLD_DANGEROUS_CONTENT` | `NONE`             | Dangerous content threshold |
+
+
+
+**Example:**
+
+    docker run -p 8080:8080 \
+      -e PROVIDER_TYPE=gemini \
+      -e PROVIDER_GEMINI_TOKEN=A-super-secret-x \
+      ghcr.io/reddec/dreaming-bard:latest
 
 ## License
 
 GPLv3 - See [LICENSE](LICENSE) for full terms.
 
-**TL;DR**: Use Dreaming-Bard freely as a service. If you modify it or include its code in your project, you must open-source those parts under GPLv3.
+**TL;DR**: Use Dreaming-Bard freely as a service. 
+If you modify it or include its code in your project, you must open-source those parts under GPLv3.

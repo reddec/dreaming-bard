@@ -3,6 +3,9 @@ services:
   bard:
     image: ghcr.io/reddec/dreaming-bard:latest
     restart: unless-stopped
+    environment:
+      PROVIDER_TYPE: openai
+      # TODO: configure bard here
     ports:
       - 8080:8080
     volumes:
