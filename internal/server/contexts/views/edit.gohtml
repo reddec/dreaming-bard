@@ -1,0 +1,35 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/contexts.editParams */}}
+{{define "main"}}
+    <article>
+    {{with .Fact}}
+
+        <form method="post" action=".">
+            <h3>{{.Title}}</h3>
+            <fieldset>
+                <label>
+                    Name
+                    <input type="text" name="name" value="{{.Title}}">
+                    <small>Short name of fact.</small>
+                </label>
+                <label>
+                    Category
+                    <input type="text" pattern="^[a-zA-Z0-9_]+$" name="category" id="category"
+                           value="{{.Category}}"/>
+                    <small>Hint for LLM to understand type of data</small>
+                </label>
+                <label>
+                    Content
+                    <textarea name="content" id="content" style="min-height: 90vh">{{.Content}}</textarea>
+                    <small>Passed only if model request it</small>
+                </label>
+            </fieldset>
+            <button type="submit">Save</button>
+            <a href="../" role="button" class="secondary" style="display: block">Cancel</a>
+        </form>
+        <br/>
+        <form hx-delete="." hx-confirm="Are you sure you want to delete this context?">
+            <button type="submit" class="outline secondary">Delete</button>
+        </form>
+        </article>
+    {{end}}
+{{end}}

@@ -1,0 +1,27 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/contexts.newParams */}}
+{{define "main"}}
+    <form method="post" action=".">
+        <fieldset>
+            <label>
+                Name
+                <input type="text" name="name">
+                <small>Short name of fact.</small>
+            </label>
+            <label>
+                Category
+                <input pattern="^[a-zA-Z0-9]+$" list="categories" type="text" name="category">
+                <small>Category of fact. Help model understand this context.</small>
+            </label>
+            <label>
+                Content
+                <textarea name="content" id="content" style="min-height: 90vh">{{.Prefill.content}}</textarea>
+            </label>
+        </fieldset>
+        <button type="submit">Create</button>
+    </form>
+    <datalist id="categories">
+        {{range .Categories}}
+            <option value="{{.}}"></option>
+        {{end}}
+    </datalist>
+{{end}}

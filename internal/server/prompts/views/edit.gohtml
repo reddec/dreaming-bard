@@ -1,0 +1,31 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/prompts.editParams */}}
+{{define "main"}}
+    <article>
+        <header>Edit prompt #{{.Prompt.ID}}</header>
+        <form method="post" action="./">
+            <fieldset>
+                <label>
+                    Name
+                    <input type="text" name="summary" value="{{.Prompt.Summary}}" />
+                </label>
+                <label>
+                    Default role
+                    <select name="default_role">
+                        {{range .Roles}}
+                            <option value="{{.ID}}"
+                                    {{if eq .ID $.Prompt.RoleID}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </label>
+                <label>
+                    Prompt
+                    <textarea name="content" style="min-height: 40vh">{{.Prompt.Content}}</textarea>
+                </label>
+            </fieldset>
+            <button type="submit">Update</button>
+        </form>
+        <footer>
+            {{template "date-time" .Prompt}}
+        </footer>
+    </article>
+{{end}}

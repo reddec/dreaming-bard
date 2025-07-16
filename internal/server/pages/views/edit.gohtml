@@ -1,0 +1,20 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/pages.editParams */}}
+{{define "main"}}
+    <h1>#{{.Page.Num}}</h1>
+    <article>
+        <form method="post" action=".">
+            <fieldset>
+                <label>
+                    Summary
+                    <textarea type="text" name="summary" id="summary">{{.Page.Summary}}</textarea>
+                </label>
+                <label>
+                    Content
+                    <textarea name="content" id="content" style="min-height: 90vh">{{.Page.Content}}</textarea>
+                </label>
+            </fieldset>
+            <button type="submit">Save</button>
+            <a href="." role="button" class="secondary" style="display: block">Cancel</a>
+        </form>
+    </article>
+{{end}}

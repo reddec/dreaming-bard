@@ -1,0 +1,42 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/pages.listParams */}}
+{{define "help-message"}}
+    <b>Pages</b> are your finished writing pieces—the final output of your creative process. Each page contains your
+    written (or generated) content along with a summary that can be auto-generated or manually crafted.
+    Every page remains fully editable, allowing you to refine and perfect your work at any time.
+{{end}}
+{{define "main"}}
+    <article>
+        <nav aria-label="breadcrumb" style="--pico-nav-breadcrumb-divider: '/';">
+            <ul class="no-v-pad">
+                <li><a href="new">New</a></li>
+                <li><a href="pages.zip">Export</a></li>
+                <li><a href="import">Import</a></li>
+                <li><a href="epub">ePub</a></li>
+            </ul>
+        </nav>
+    </article>
+
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_page" ) }}
+    <br/>
+    {{range .Pages}}
+        <article id="pg{{.ID}}">
+            <header class="between">
+                <a href="{{.ID}}/">#{{.Num}}</a>
+                <a href="./{{.ID}}/?edit=true">
+                    {{template "icon" "edit"}}
+                </a>
+            </header>
+            {{.Summary}}
+            <footer class="between">
+                <div>
+                    {{template "date-time" .}}
+                </div>
+                <a href="" class="js-only pico-color-red-600" hx-delete="./{{.ID}}/?stay=true"
+                   hx-confirm="Are you sure you want to delete this page?"
+                   hx-target="#pg{{.ID}}" hx-swap="outerHTML">
+                    {{template "icon" "trash"}}
+                </a>
+            </footer>
+        </article>
+    {{end}}
+{{end}}

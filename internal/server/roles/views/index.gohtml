@@ -1,0 +1,22 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/roles.indexParams */}}
+{{define "main"}}
+    {{with .Role}}
+        <article>
+            <header>{{.Name}}</header>
+            <p>
+                <small>
+                    Model: {{if .Model}}{{.Model}}{{else}}<i>(default global
+                        model)</i>{{end}}
+                    {{- with .Purpose}}, default purpose: {{.}}{{end}}
+                </small>
+            </p>
+            <pre style="white-space: pre-wrap">{{.System}}</pre>
+            <footer class="grid">
+                <a role="button" href="?edit=true">Edit</a>
+                <button class="secondary outline" form="deleteForm">Delete</button>
+            </footer>
+            <form id="deleteForm" hx-delete="." hx-confirm="Are you sure you want to delete this page?">
+            </form>
+        </article>
+    {{end}}
+{{end}}

@@ -1,0 +1,4 @@
+-- +migrate Up
+
+ALTER TABLE context
+    ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE;

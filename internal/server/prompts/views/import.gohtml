@@ -1,0 +1,23 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/prompts.importParams */}}
+{{define "main"}}
+    <article>
+        <header>Import prompts</header>
+        <form method="post" enctype="multipart/form-data">
+            <label>
+                Zip archive(s) or individual Markdown prompts files.
+                <input type="file" name="file" multiple
+                       accept=".md, .MD, text/markdown, text/*, .zip, .ZIP, application/zip"/>
+            </label>
+            <label>
+                Default role (for prompts without roles)
+                <select name="default_role">
+                    {{range .Roles}}
+                        <option value="{{.ID}}" {{if eq .ID $.FirstWriter}}selected{{end}}>{{.Name}} ({{.Purpose}})
+                        </option>
+                    {{end}}
+                </select>
+            </label>
+            <button type="submit">Import</button>
+        </form>
+    </article>
+{{end}}

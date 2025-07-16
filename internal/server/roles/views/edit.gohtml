@@ -1,0 +1,34 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/roles.editParams */}}
+{{define "main"}}
+    {{with .Role}}
+        <article>
+            <header>{{.Name}}</header>
+            <form method="post" action="./">
+                <fieldset>
+                    <label>
+                        Name
+                        <input type="text" name="name" value="{{.Name}}"/>
+                    </label>
+                    <label>
+                        Model
+                        <input type="text" name="model" value="{{.Model}}"/>
+                        <small>If not set - default model will be used</small>
+                    </label>
+                    <label>
+                        System instruction
+                        <textarea name="system" style="min-height: 40vh" rows="{{max (add (.System | linesCount) 1) 10}}">{{.System}}</textarea>
+                    </label>
+                    <label>
+                        Main purpose
+                        <select name="purpose">
+                            {{range $.Purposes}}
+                                <option value="{{.}}" {{if eq $.Role.Purpose .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </label>
+                </fieldset>
+                <button type="submit">Save</button>
+            </form>
+        </article>
+    {{end}}
+{{end}}

@@ -1,0 +1,385 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/blueprint.indexParams */}}
+{{define "body"}}
+    <style>
+
+        article > header.between {
+            flex-wrap: nowrap !important;
+        }
+
+        article > header.between a[hx-delete] {
+            text-decoration: none;
+        }
+
+        .b-grid {
+            display: grid;
+            @media (min-width: 768px) and (max-width: 1024px) {
+                grid-template-columns: 1fr 2fr 1fr;
+            }
+            @media (min-width: 1024px) and (max-width: 1768px) {
+                grid-template-columns: 1fr 3fr 1fr;
+            }
+            @media (min-width: 1768px) {
+                grid-template-columns: 1fr 4fr 1fr;
+            }
+            grid-gap: var(--pico-spacing);
+        }
+
+
+        .b-grid > div > h2 {
+            /*text-align: center;*/
+        }
+
+        .b-grid > div {
+            border-radius: var(--pico-border-radius);
+        }
+
+        .dw-grid-2 {
+            display: grid;
+
+            gap: 1rem;
+
+            @media (min-width: 768px) and (max-width: 1024px) {
+                grid-template-columns: 1fr 1fr;
+            }
+            @media (min-width: 1024px) and (max-width: 1768px) {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            @media (min-width: 1768px) {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+        }
+
+        .timeline > article:not(:last-child) {
+            margin-bottom: 0 !important;
+        }
+
+        .timeline > div > .track {
+            height: 1rem;
+            margin: calc(var(--pico-spacing) / 2);
+            border-left: 1px dashed var(--pico-color-slate-400);
+            margin-left: 50%;
+        }
+
+        .little-actions select, button {
+            padding: calc(var(--pico-spacing) / 4) !important;
+            margin: 0;
+        }
+
+    </style>
+    <div class="container-fluid" style="height: 100%">
+        {{template "menu"}}
+
+        <div class="b-grid">
+            <div id="linkedContexts">
+                <h2>Contexts</h2>
+
+                {{range .LinkedContext}}
+                    <article id="lc{{.ID}}">
+                        <header class="between">
+                            <small>
+                                {{- if .Archived}}
+                                    {{template "icon" "archive"}}
+                                {{- end}}
+                                {{.Category}}
+                            </small>
+                            <small>
+                                <a class="pico-color-red-600" href="" hx-delete="./contexts/{{.ID}}"
+                                   hx-target="#lc{{.ID}}" hx-swap="outerHTML">
+                                    {{template "icon" "trash"}}
+                                </a>
+                            </small>
+                        </header>
+                        <details>
+                            <summary>{{.Title}}</summary>
+                            {{.Content | runesTruncate 128}}
+                        </details>
+                        <footer>
+                            <a href="/context/{{.ID}}/" target="_blank">
+                                <small>{{or .Title "Open"}}</small>
+                            </a>
+                        </footer>
+                    </article>
+                {{end}}
+                {{with .AvailableFacts}}
+                    <article>
+                        <form method="post" action="./contexts" hx-post="./contexts"
+                              hx-select="#linkedContexts"
+                              hx-target="#linkedContexts"
+                              hx-swap="outerHTML">
+                            <label>
+                                <select name="contextID">
+                                    {{range .}}
+                                        <option value="{{.ID}}">{{.Title}}</option>
+                                    {{end}}
+                                </select>
+                            </label>
+                            <button type="submit">Link</button>
+                        </form>
+                    </article>
+                {{end}}
+            </div>
+            <div class="timeline" id="timeline">
+                <h2>Outline</h2>
+                {{with .Steps}}
+                    {{range $index, $step := .}}
+                        <div id="sw{{$step.ID}}">
+
+                            <article id="s{{.ID}}">
+
+                                {{if eq $.EditStep .ID}}
+                                    <form method="post" action="./steps/{{.ID}}"
+                                          hx-post="./steps/{{.ID}}"
+                                          hx-select="#s{{.ID}}"
+                                          hx-target="#s{{.ID}}" hx-swap="outerHTML">
+                                        <textarea autofocus name="content"
+                                                  rows="{{max (add (.Content | linesCount) 1) 4}}">{{.Content}}</textarea>
+                                        <fieldset role="group">
+                                            <button type="submit">Save</button>
+                                            <a href="./#s{{.ID}}"
+                                               hx-get="./"
+                                               hx-select="#s{{.ID}}"
+                                               hx-target="#s{{.ID}}" hx-swap="outerHTML"
+                                               role="button" class="outline secondary">cancel</a>
+                                        </fieldset>
+                                    </form>
+                                {{else}}
+                                    <header class="between">
+                                        <a href="?editStep={{.ID}}#s{{.ID}}"
+                                           hx-get="?editStep={{.ID}}"
+                                           hx-target="#s{{.ID}}"
+                                           hx-select="#s{{.ID}}" hx-swap="outerHTML">
+                                            {{template "icon" "edit"}}
+                                        </a>
+                                        <a class="pico-color-red-600" href="" hx-delete="./steps/{{.ID}}"
+                                           hx-target="#sw{{$step.ID}}" hx-swap="outerHTML">
+                                            {{template "icon" "trash"}}
+                                        </a>
+                                    </header>
+                                    {{.Content | markdown}}
+                                    {{with $.Roles}}
+                                        <footer>
+                                            <form method="post" action="./steps/{{$step.ID}}/enhance"
+                                                  class="little-actions"
+                                                  id="fs{{$step.ID}}">
+                                                <fieldset role="group" style="align-items: center">
+                                                    <select name="roleID">
+                                                        {{range .}}
+                                                            <option value="{{.ID}}"
+                                                                    {{if eq .Purpose "enhance"}}selected{{end}}>{{.Name}}</option>
+                                                        {{end}}
+                                                    </select>
+                                                    {{if $.IsActiveStep $step.ID}}
+                                                        <button class="outline" type="button" disabled
+                                                                hx-get="."
+                                                                hx-trigger="every 1s"
+                                                                hx-target="#s{{$step.ID}}"
+                                                                hx-select="#s{{$step.ID}}"
+                                                                hx-swap="outerHTML"
+                                                        >
+                                                            Enhance
+                                                        </button>
+                                                        <span aria-busy="true"></span>
+                                                    {{else}}
+                                                        <button class="outline" type="submit">
+                                                            Enhance
+                                                        </button>
+                                                    {{end}}
+                                                </fieldset>
+                                            </form>
+                                        </footer>
+                                    {{end}}
+                                {{end}}
+                            </article>
+                            <div class="track"></div>
+                        </div>
+                    {{end}}
+                {{end}}
+                {{if not .EditStep}}
+                    <form method="post" id="mainForm" action="./steps">
+                        <fieldset>
+                            <label>
+                                <textarea name="content" rows="4" autofocus
+                                          placeholder="The hero went to ..."></textarea>
+                            </label>
+                        </fieldset>
+                        <fieldset role="group">
+                            {{if .IsPlanning}}
+                                <span aria-busy="true"
+
+                                      hx-get="."
+                                      hx-trigger="every 1s"
+                                      hx-target="#timeline"
+                                      hx-select="#timeline"
+                                      hx-swap="outerHTML"
+                                >planning ...</span>
+                            {{else}}
+                                <button type="submit">Add</button>
+                                {{if eq ( .Steps | len) 0}}
+                                    <button type="submit" formaction="./plan" class="outline">Plan</button>
+                                {{end}}
+                            {{end}}
+                        </fieldset>
+                    </form>
+                {{end}}
+                {{if .Pages}}
+                    <h3>Linked pages</h3>
+
+                    <form method="post" action="./pages">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th>
+                                    <a href="" id="fullAll">Full</a>
+                                </th>
+                                <th>
+                                    <a href="" id="summaryAll">Summary</a>
+                                </th>
+                                <th>
+                                    <a href="" id="ignoreAll">Ignore</a>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range .Pages}}
+                                <tr>
+                                    <td>
+                                        <a href="/pages/{{.Page.ID}}/" target="_blank">#{{.Page.Num}}
+                                            <span class="hide-on-mobile"> - {{.Page.Summary | runesTruncate 32}}</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="{{.Page.ID}}" value="full"
+                                               hx-post="./pages"
+                                               hx-swap="none"
+                                                {{if .IsFull}}
+                                                    checked
+                                                {{end}}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="{{.Page.ID}}" value="summary"
+                                               hx-post="./pages"
+                                               hx-swap="none"
+                                               hx-indicator="#saving"
+                                                {{if .IsSummary}}
+                                                    checked
+                                                {{end}}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="{{.Page.ID}}" value="ignore"
+                                               hx-post="./pages"
+                                               hx-swap="none"
+                                                {{if  not .IsIncluded}}
+                                                    checked
+                                                {{end}}
+                                        />
+                                    </td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                        <noscript>
+                            <button type="submit" id="saving">Save</button>
+                        </noscript>
+                    </form>
+                {{end}}
+            </div>
+            <div>
+                <h2>Settings</h2>
+
+                <article id="settings">
+                    <header>Notes</header>
+                    <form method="post" action="./">
+                        <label>
+                                <textarea name="note" rows="8"
+                                          hx-post="./"
+                                          hx-trigger="keyup changed delay:200ms, every 30s"
+                                          hx-swap="none"
+                                >{{.Blueprint.Note}}</textarea>
+                            <small>Author notes about the blueprint. Will be included in context too</small>
+                        </label>
+                        <noscript>
+                            <button type="submit">Save</button>
+                        </noscript>
+                    </form>
+                </article>
+                {{if eq ( .Steps | len) 0}}
+                    {{with .Roles}}
+                        <article>
+                            <label>
+                                Planner
+                                <select name="roleID" form="mainForm">
+                                    {{range .}}
+                                        <option value="{{.ID}}"
+                                                {{if eq .Purpose "plan"}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                            </label>
+                        </article>
+                    {{end}}
+                {{end}}
+                {{with .Roles}}
+                    <article>
+                        <form method="post" action="./chat">
+                            <label>
+                                Role
+                                <select name="roleID">
+                                    {{range .}}
+                                        <option value="{{.ID}}"
+                                                {{if eq .Purpose "write"}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                            </label>
+                            <button type="submit">Start chat</button>
+                        </form>
+                    </article>
+                {{end}}
+                {{with .Chats}}
+                    <h3>Chats</h3>
+                    <ul>
+                        {{range .}}
+                            <li>
+                                <a href="/chats/{{.ID}}/">{{.CreatedAt.Format "2006 January 02, 15:04:05"}}</a>
+                            </li>
+                        {{end}}
+                    </ul>
+                {{end}}
+            </div>
+        </div>
+
+    </div>
+    <script>
+        document.querySelectorAll('form').forEach(function (form) {
+            form.querySelectorAll('textarea').forEach(function (area) {
+                area.addEventListener('keydown', function (e) {
+                    // submit on Ctrl+Enter
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        e.preventDefault();
+                        form.submit();
+                    }
+                })
+            })
+        })
+
+        document.getElementById('ignoreAll').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('input[value="ignore"]').forEach(function (input) {
+                input.checked = true;
+            })
+        })
+        document.getElementById('fullAll').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('input[value="full"]').forEach(function (input) {
+                input.checked = true;
+            })
+        })
+        document.getElementById('summaryAll').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('input[value="summary"]').forEach(function (input) {
+                input.checked = true;
+            })
+        })
+    </script>
+{{end}}

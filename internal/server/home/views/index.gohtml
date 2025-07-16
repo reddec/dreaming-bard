@@ -1,0 +1,98 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/home.indexParams */}}
+{{define "main"}}
+    <style>
+        .row-info {
+            display: flex;
+        }
+
+        .row-info > :first-child {
+            writing-mode: vertical-rl;
+            text-align: center;
+            padding: var(--pico-spacing);
+            margin-left: 0;
+            margin-right: var(--pico-block-spacing-horizontal);
+            margin-bottom: var(--pico-block-spacing-vertical);
+            border-radius: var(--pico-border-radius);
+        }
+
+        .row-info > :not(:first-child) {
+            flex-grow: 1;
+        }
+    </style>
+    {{with .PinnedPrompts}}
+        <!-- inspired by GitHub :-) -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4>Start chat</h4>
+            <small style="font-size: x-small">Customise <a href="prompts/">pinned prompts</a></small>
+        </div>
+        <div class="dw-grid-3">
+            {{range .}}
+                <form method="POST" action="/chats/">
+                    <input type="hidden" name="role" value="{{.RoleID}}">
+                    <label>
+                        <button type="submit" name="draft" value="{{.Content}}" class="outline">
+                            {{template "icon" "message-circle-plus"}} {{.Summary}}
+                        </button>
+                    </label>
+                </form>
+            {{end}}
+        </div>
+    {{end}}
+
+    {{with .Chats}}
+        <h4>Last <a href="/chats/">chats</a></h4>
+        {{range  .}}
+            <article>
+                <header>
+                    <a href="/chats/{{.ID}}/#end">{{.CreatedAt.Format "2006 January 02, 15:04:05"}}</a>
+                </header>
+                {{with or .Draft .Annotation}}
+                    <p>{{.}}</p>
+                {{end}}
+                <small></small>
+                <footer class="between">
+                    <div>
+                        {{template "date-time" .}}
+                    </div>
+                    <small>
+                        <i>input {{.InputTokens}}, output: {{.OutputTokens}}</i>
+                    </small>
+                </footer>
+            </article>
+        {{end}}
+    {{end}}
+
+    {{with .Pages}}
+        <h4>Last <a href="/pages/">pages</a></h4>
+        {{range .}}
+            <article>
+                <a href="/pages/{{.ID}}/">#{{.Num}}</a>
+                {{(or .Summary .Content) | runesTruncate 128}}
+                <footer>
+                    {{template "date-time" .}}
+                </footer>
+            </article>
+        {{end}}
+    {{end}}
+
+
+    {{with .Config}}
+        <hr/>
+        <h4>Instance configuration</h4>
+        <article>
+            {{if eq .Type "ollama"}}
+                <header>{{template "icon" "plug-connected"}} Ollama</header>
+                {{.Ollama.URL}}
+                <footer>Default model - {{.Ollama.Model}}</footer>
+            {{else if eq .Type "openai"}}
+                <header>{{template "icon" "plug-connected"}} OpenAI</header>
+                {{.OpenAI.URL}}
+                <footer>Default model - {{.OpenAI.Model}}</footer>
+            {{else if eq .Type "gemini"}}
+                <header>{{template "icon" "plug-connected"}} Gemini</header>
+                <footer>Default model - {{.Gemini.Model}}</footer>
+            {{end}}
+        </article>
+    {{end}}
+
+{{end}}

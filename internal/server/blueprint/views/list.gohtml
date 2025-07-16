@@ -1,0 +1,46 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/blueprint.listParams */}}
+{{define "help-message"}}
+    <b>Blueprints</b> are your creative workspaces for building new pages. Each blueprint lets you gather contexts,
+    reference existing pages, outline story beats, and organize all the elements you need before diving in. Think of
+    them as your planning desk where ideas take shape before becoming reality.
+{{end}}
+{{define "main"}}
+    <article>
+        <nav aria-label="breadcrumb" style="--pico-nav-breadcrumb-divider: '/';">
+            <ul class="no-v-pad">
+                <li>
+                    <a href="./" hx-post="./" class="js-only">New</a>
+                    <noscript>
+                        <form method="post" action="./">
+                            <button>New blueprint</button>
+                        </form>
+                    </noscript>
+                </li>
+            </ul>
+        </nav>
+    </article>
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_blueprint" ) }}
+    {{if .Blueprints}}
+        <table>
+            <thead>
+            <tr>
+                <th>Created</th>
+                <th>Note</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{range .Blueprints}}
+                <tr>
+                    <td>
+                        <a href="{{.ID}}/">
+                            {{.CreatedAt.Format "2006 January 02, 15:04:05"}}
+                        </a>
+                    </td>
+                    <td>{{.Note | runesTruncate 32}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+    {{end}}
+
+{{end}}

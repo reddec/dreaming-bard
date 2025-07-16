@@ -1,0 +1,110 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/contexts.listParams */}}
+{{define "help-message"}}
+    <b>Contexts</b> are pre-configured snippets of lore and world-building details. Every context combines a name,
+    category
+    tag, and descriptive information—whether it's defining characters, establishing locations, or preserving story
+    elements. Include them in conversations to ensure consistency throughout your narrative.
+{{end}}
+{{define "main"}}
+    <article>
+        <nav aria-label="breadcrumb" style="--pico-nav-breadcrumb-divider: '/';">
+            <ul class="no-v-pad">
+                <li><a href="new">New</a></li>
+                <li><a href="context.zip">Export</a></li>
+                <li><a href="import">Import</a></li>
+            </ul>
+        </nav>
+    </article>
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_context" ) }}
+
+    <style>
+        table > tbody > tr > td {
+            word-break: break-all;
+        }
+
+        table > thead > tr > th > form > fieldset * {
+            padding: calc(var(--pico-spacing) / 4) !important;
+            margin: 0;
+        }
+    </style>
+    {{if gt ( $.Categories | len) 1}}
+        <form>
+            <fieldset role="group">
+                <label>
+                    Filter by category
+                    <select name="category" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        {{range $.Categories}}
+                            <option value="{{.}}" {{if eq $.Category .}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </label>
+                <noscript>
+                    <button type="submit">Filter</button>
+                </noscript>
+            </fieldset>
+
+        </form>
+    {{end}}
+    {{if .Facts}}
+        <table id="facts">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Title</th>
+                <th>
+                    Category
+                </th>
+            </tr>
+            </thead>
+            {{with .ActiveFacts}}
+                {{template "factsTable" .}}
+            {{end}}
+            {{with .ArchivedFacts}}
+                <tr>
+                    <th colspan="3">
+                        <h4 style="margin-top: var(--pico-spacing)">{{template "icon" "archive"}} Archive</h4>
+                        <small>Archived context entries are not visible in <b>Chats</b> and <b>Blueprints</b>.</small>
+                    </th>
+                </tr>
+                {{template "factsTable" .}}
+            {{end}}
+        </table>
+    {{end}}
+{{end}}
+{{define "factsTable"}}
+
+    <tbody>
+    {{range .}}
+        <tr>
+            <td>
+                <form method="post" action="./{{.ID}}/archived">
+                    <input type="hidden" name="archived" value="{{not .Archived}}">
+                    <noscript>
+                        <button type="submit">
+                            {{if not .Archived}}
+                                {{template "icon" "archive"}}
+                            {{else}}
+                                {{template "icon" "transition-top"}}
+                            {{end}}
+                        </button>
+                    </noscript>
+                    <a href="" class="js-only" hx-post="./{{.ID}}/archived" hx-target="#facts" hx-select="#facts"
+                       hx-swap="outerHTML">
+                        {{if not .Archived}}
+                            {{template "icon" "archive"}}
+                        {{else}}
+                            {{template "icon" "transition-top"}}
+                        {{end}}
+                    </a>
+                </form>
+            </td>
+            <td>
+                <a href="./{{.ID}}/">{{or .Title "(untitled)"}}</a>
+            </td>
+            <td>{{.Category}}</td>
+        </tr>
+    {{end}}
+    </tbody>
+
+{{end}}

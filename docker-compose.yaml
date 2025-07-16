@@ -1,0 +1,11 @@
+version: "3"
+services:
+  bard:
+    image: ghcr.io/reddec/dreaming-bard:latest
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    volumes:
+      - bard:/data
+volumes:
+  bard: {}

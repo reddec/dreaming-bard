@@ -1,0 +1,317 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/chats.indexParams */}}
+{{define "main"}}
+    <style>
+        .small-button {
+            padding: calc(var(--pico-spacing) / 2);
+        }
+
+
+
+        @media (min-width: 768px) {
+            .user-message {
+                margin-left: calc(2 * var(--pico-spacing));
+            }
+
+            .assistant-message {
+                margin-right: calc(2 * var(--pico-spacing));
+            }
+        }
+
+        .overflow-ellipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+    {{with .Chat}}
+    <div id="chat-root">
+        <form id="newPage" method="POST" action="../../pages/new">
+        </form>
+        <form id="newContext" method="POST" action="../../context/new?manualOnly=true">
+        </form>
+
+        {{with $.Role}}
+            <article>
+                <header>
+                    <h3>🧵 #{{$.Chat.ID}}</h3>
+                </header>
+                <details>
+                    <summary>🤖 Hi!
+                        {{if .Name}}
+                            My name is <a href="/roles/{{.ID}}/">{{.Name}}</a>.
+                        {{end}}
+                        {{if .Model}}
+                            I am <a href="/roles/{{.ID}}/">{{.Model}}</a> model.
+                        {{end}}
+                    </summary>
+                    <h4>System instruction</h4>
+                    <br/>
+                    <pre>{{.System}}</pre>
+                    <br/>
+                    <dl>
+                        <dt>ID</dt>
+                        <dd>
+                            <a href="/roles/{{.ID}}/">{{.ID}}</a>
+                        </dd>
+                        <dt>Model</dt>
+                        <dd>{{or .Model "(default provider model)"}}</dd>
+                        <dt>Purpose</dt>
+                        <dd>{{.Purpose}}</dd>
+                        <dt>Created</dt>
+                        <dd>{{.CreatedAt.Format "2006 January 02, 15:04:05"}}</dd>
+                        <dt>Updated</dt>
+                        <dd>{{.UpdatedAt.Format "2006 January 02, 15:04:05"}}</dd>
+                    </dl>
+
+                </details>
+                <footer class="between">
+                    <small>
+                        <abbr title="Chat created">{{.CreatedAt.Format "2006 January 02, 15:04:05"}}</abbr>
+                    </small>
+                    <small>
+                        <abbr title="Chat updated">{{.UpdatedAt.Format "2006 January 02, 15:04:05"}}</abbr>
+                    </small>
+                </footer>
+            </article>
+        {{end}}
+        <hr/>
+
+
+        {{range $.History}}
+            <article id="m{{.ID}}" class="{{.Role}}-message">
+                <header class="between">
+                    <h3><a href="#m{{.ID}}">#</a>
+                        {{if eq .Role "assistant"}}
+                            🤖
+                            {{if $.Role.Name}}
+                                {{$.Role.Name}}
+                            {{else}}
+                                assistant
+                            {{end}}
+                        {{else if eq .Role "user"}}
+                            👤 you
+                        {{else}}
+                            {{.Role}}
+                        {{end}}
+                    </h3>
+                    <form hx-delete="messages/{{.ID}}/" hx-confirm="Are you sure you want to delete this message?">
+                        <button class="small-borderless-button outline secondary">×</button>
+                    </form>
+                </header>
+                {{if eq $.EditMessageID .ID}}
+                    <form method="POST" action="messages/{{.ID}}/">
+                        <fieldset>
+                            <label for="content">Message
+                                <textarea name="content" rows="6">{{.Content}}</textarea>
+                            </label>
+                        </fieldset>
+                        <fieldset role="group">
+                            <button type="submit">Update</button>
+                            <a role="button" class="outline secondary" href=".#m{{.ID}}">Cancel</a>
+                        </fieldset>
+                    </form>
+                {{else}}
+                    {{if .ToolName}}
+                        <details>
+                            <summary class="overflow-ellipsis">
+                                <code>{{.ToolName}}{{if .ToolID}}#{{.ToolID}}{{end}}</code></summary>
+                            {{.Content | fromJson  | toPrettyJson | jsonBlock}}
+                        </details>
+                    {{else}}
+
+                        <div>
+                            {{.Content | withoutContext | markdown}}
+                            {{with (.Content | getContext)}}
+                                <hr/>
+                                <details>
+                                    <summary>{{template "icon" "brand-databricks"}} Context</summary>
+                                    {{. | codeblock "xml" | markdown}}
+                                </details>
+                            {{end}}
+                        </div>
+                        <small><i>Words: {{.Content | withoutContext | words}}</i></small>
+                    {{end}}
+                {{end}}
+
+                {{if eq .Role "assistant" }}
+                    <footer class="between">
+                        <button type="submit" class="outline small-button" name="content" value="{{.Content}}"
+                                form="newPage">As page
+                        </button>
+                        {{if not $.EditMessageID}}
+                            <a role="button" class="secondary outline small-button"
+                               href="?editMessageID={{.ID}}#m{{.ID}}">
+                                Edit
+                            </a>
+                        {{end}}
+                        <button class="outline contrast small-button" form="newContext" name="content"
+                                value="{{.Content}}"
+                                type="submit">
+                            As context
+                        </button>
+                    </footer>
+                {{else if eq .Role "user"}}
+                    <footer class="between">
+                        <button type="button" class="outline small-button" name="content"
+                                onclick="copyToClipboard(event, '{{.Content | withoutContext | trim}}')">
+                            Copy source
+                        </button>
+                        {{if not $.EditMessageID}}
+                            <a role="button" class="secondary outline small-button" href="?editMessageID={{.ID}}">
+                                Edit
+                            </a>
+                        {{end}}
+                    </footer>
+                {{end}}
+
+            </article>
+        {{end}}
+        <hr/>
+
+        <p>
+            <small><i>total chat usage: <b>in</b> {{.InputTokens}}, <b>out</b> {{.OutputTokens}}</i></small>
+        </p>
+        {{if $.IsBusy}}
+            <br/>
+            <span aria-busy="true">Generating answer...</span>
+            <br/>
+
+
+            <!-- HTMX polling element: This invisible div will trigger the poll. -->
+            <!-- It only exists when .IsBusy is true, making the polling conditional. -->
+            <div hx-get="."
+                 hx-trigger="every 1s"
+                 hx-target="#chat-root"
+                 hx-select="#chat-root"
+                 hx-swap="outerHTML"></div>
+            <form method="post" action="stop">
+                <button type="submit" class="outline secondary">Stop</button>
+            </form>
+        {{end}}
+        <article>
+            <form method="POST" id="newMessage">
+                <label for="message">Message</label>
+                <textarea name="message" id="message" rows="6" placeholder="Ask me anything..."
+                          hx-post="./draft"
+                          hx-trigger="keyup changed delay:1s, every 30s"
+                          hx-swap="none"
+                        {{if and (not $.EditMessageID) $.Chat.Draft}} autofocus {{end}}
+                        {{if $.IsBusy}}disabled{{end}}>{{.Draft}}</textarea>
+                <details name="attachments">
+                    <summary>
+                        {{template "icon" "brand-databricks"}}
+                        Attach context
+                    </summary>
+                    {{template "factSelector" $.Facts}}
+                </details>
+                {{with $.Pages}}
+                    <hr/>
+                    <details name="attachments">
+                        <summary>
+                            {{template "icon" "book"}}
+                            Attach pages
+                        </summary>
+
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th>
+                                    <a href="" id="fullAll">Full</a>
+                                </th>
+                                <th>
+                                    <a href="" id="summaryAll">Summary</a>
+                                </th>
+                                <th>
+                                    <a href="" id="ignoreAll">Ignore</a>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range .}}
+                                <tr>
+                                    <td>
+                                        <a href="/pages/{{.ID}}/" target="_blank">#{{.Num}}
+                                            <span class="hide-on-mobile"> - {{.Summary | runesTruncate 32}}</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="page_{{.ID}}" value="full"/>
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="page_{{.ID}}" value="summary"/>
+                                    </td>
+                                    <td>
+                                        <input type="radio" name="page_{{.ID}}" value="ignore" checked/>
+                                    </td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                        <script>
+                            document.getElementById('ignoreAll').addEventListener('click', function (e) {
+                                e.preventDefault();
+                                document.querySelectorAll('input[value="ignore"]').forEach(function (input) {
+                                    input.checked = true;
+                                })
+                            })
+                            document.getElementById('fullAll').addEventListener('click', function (e) {
+                                e.preventDefault();
+                                document.querySelectorAll('input[value="full"]').forEach(function (input) {
+                                    input.checked = true;
+                                })
+                            })
+                            document.getElementById('summaryAll').addEventListener('click', function (e) {
+                                e.preventDefault();
+                                document.querySelectorAll('input[value="summary"]').forEach(function (input) {
+                                    input.checked = true;
+                                })
+                            })
+                        </script>
+                    </details>
+
+                {{end}}
+                <br/>
+                <button id="end" type="submit" {{if $.IsBusy}}disabled{{end}}>Send</button>
+            </form>
+        </article>
+        {{end}}
+        <script>
+            document.getElementById('message').addEventListener('keydown', function (e) {
+                // submit on Ctrl+Enter
+                const form = document.getElementById("newMessage");
+
+                if (e.key === 'Enter' && e.ctrlKey) {
+
+                    e.preventDefault();
+                    form.submit();
+                }
+            })
+        </script>
+        <script>
+            async function copyToClipboard(event, text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            }
+
+        </script>
+    </div>
+
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+            const messageContainer = document.getElementById('chat-root');
+            messageContainer.scrollTo(0, messageContainer.scrollHeight);
+        });
+    </script>
+
+
+{{end}}

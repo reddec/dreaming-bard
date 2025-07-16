@@ -1,0 +1,10 @@
+.env
+.idea
+.vscode
+/dist
+/build
+*.sqlite
+/demo
+/dreaming-bard
+# Added by goreleaser init:
+dist/

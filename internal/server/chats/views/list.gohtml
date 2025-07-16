@@ -1,0 +1,74 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/chats.listParams */}}
+{{define "help-message"}}
+    <b>Threads</b> are conversations with your chosen AI <b>Role</b>, enhanced with the ability to add
+    context and pages.
+    Use them for any writing task—from developing characters to outlining chapters—with one-click options to
+    export any message as context or transform it into a new page.
+{{end}}
+{{define "main"}}
+    <article>
+        {{template "createThread" "."}}
+    </article>
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_chats" ) }}
+
+    {{if .Threads}}
+        <div class="overflow-auto" id="chats">
+            {{if gt (.BusyChats | len) 0}}
+                <div hx-get="."
+                     hx-trigger="every 1s"
+                     hx-target="#chats"
+                     hx-select="#chats"
+                     hx-swap="outerHTML"></div>
+            {{end}}
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th class="hide-on-mobile"></th>
+                    <th></th>
+                    <th colspan="2">Tokens</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th class="hide-on-mobile">Role</th>
+                    <th>
+                        <abbr title="Num message">Num</abbr>
+                    </th>
+                    <th>In</th>
+                    <th>Out</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range  .Threads}}
+                    <tr>
+                        <td>
+                            <a href="{{.Chat.ID}}/#end">{{.Chat.CreatedAt.Format "2006 January 02, 15:04:05"}}</a>
+                            {{with .Chat.Annotation}}
+                                <br/>
+                                <small>{{.}}</small>
+                            {{end}}
+                        </td>
+                        <td class="hide-on-mobile">
+                            <a href="../roles/{{.Chat.RoleID}}/">{{.RoleName}}</a>
+                        </td>
+                        <td>{{.NumMessages}}</td>
+                        <td> {{.Chat.InputTokens}}</td>
+                        <td>{{.Chat.OutputTokens}}</td>
+                        <td>
+                            {{- if $.IsBusy .Chat.ID}}
+                                <span aria-busy="true"></span>
+                            {{- else}}
+                                <i>ready</i>
+                            {{- end}}
+                        </td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    {{end}}
+
+
+{{end}}

@@ -1,0 +1,31 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/roles.newParams */}}
+{{define "main"}}
+    <article>
+        <form method="post" action="./">
+            <fieldset>
+                <label>
+                    Name
+                    <input type="text" name="name" required/>
+                </label>
+                <label>
+                    Model
+                    <input type="text" name="model" value="{{.Model}}" />
+                    <small>If not set - default model will be used</small>
+                </label>
+                <label>
+                    System instruction
+                    <textarea name="system" style="min-height: 40vh">{{.Content}}</textarea>
+                </label>
+            </fieldset>
+            <label>
+                Main purpose
+                <select name="purpose">
+                    {{range $.Purposes}}
+                        <option value="{{.}}" {{if eq $.Purpose .}}selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </label>
+            <button type="submit">Create</button>
+        </form>
+    </article>
+{{end}}

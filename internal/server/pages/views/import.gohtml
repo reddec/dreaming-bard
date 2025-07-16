@@ -1,0 +1,16 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/pages.importParams */}}
+{{define "main"}}
+    <article>
+        <header>
+            <h3>Import archive</h3>
+        </header>
+        <form method="post" enctype="multipart/form-data">
+            <label>
+                Zip archive(s) or individual Markdown page files.
+                <input type="file" name="file" multiple
+                       accept=".md, .MD, text/markdown, text/*, .zip, .ZIP, application/zip"/>
+            </label>
+            <button type="submit">Import</button>
+        </form>
+    </article>
+{{end}}

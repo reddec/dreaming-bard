@@ -1,0 +1,19 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/pages.epubParams */}}
+{{define "main"}}
+    <article>
+        <header>Export book as ePub</header>
+        <form method="post">
+            <fieldset>
+                <label>
+                    Title
+                    <input type="text" name="title" required>
+                </label>
+                <label>
+                    Author
+                    <input type="text" name="author" required>
+                </label>
+            </fieldset>
+            <button type="submit">Create</button>
+        </form>
+    </article>
+{{end}}

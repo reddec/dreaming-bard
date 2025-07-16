@@ -1,0 +1,31 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/contexts.indexParams */}}
+{{define "main"}}
+    <h3>
+        {{.Fact.Title}}
+        {{if .Fact.Archived}}
+            <small>(archived)</small>
+        {{end}}
+        <a href="?edit=true" style="float: right">{{template "icon" "edit"}}</a>
+
+
+    </h3>
+    <h4>
+        <i>{{.Fact.Category}}</i>
+        <a href=""
+           hx-delete="."
+           hx-confirm="Are you sure you want to delete this context item?"
+           style="float: right" class="pico-color-red-600 js-only">
+            {{template "icon" "trash"}}
+        </a>
+    </h4>
+    <div>
+        {{with .Fact}}
+            {{template "date-time" .}}
+        {{end}}
+
+    </div>
+    <hr/>
+    <div>
+        {{.Fact.Content | markdown}}
+    </div>
+{{end}}

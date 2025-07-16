@@ -1,0 +1,57 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/pages.indexParams */}}
+{{define "formSummary"}}
+    <form id="genSummary" method="post" action="./generate-summary">
+        <fieldset>
+            <label>
+                Agent to generate summary
+                <select name="role">
+                    {{range $.Roles}}
+                        <option value="{{.ID}}"
+                                {{if eq .Purpose "summary"}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>
+            </label>
+        </fieldset>
+        <button form="genSummary" type="submit" class="outline">Generate summary</button>
+    </form>
+{{end}}
+
+{{define "main"}}
+
+    <article>
+        <header>
+            <div class="between">
+                <h1>#{{.Page.Num}}</h1>
+                <form method="post" action="./move">
+                    <fieldset role="group" style="margin: 0">
+                        <input type="number" value="{{.Page.Num}}" name="num">
+                    </fieldset>
+
+                </form>
+            </div>
+
+            <a href="?edit=true">Edit page</a>
+        </header>
+        {{with .Page.Summary}}
+            <details>
+                <summary>Summary</summary>
+                {{.}}
+                <hr/>
+                {{template "formSummary" $}}
+            </details>
+        {{else}}
+            {{template "formSummary" $}}
+            <hr/>
+        {{end}}
+
+        <footer>
+            {{template "date-time" .Page}}
+        </footer>
+    </article>
+    <article>
+        {{.Page.Content | markdown}}
+    </article>
+    <form hx-delete="." hx-confirm="Are you sure you want to delete this page?">
+        <button type="submit">Delete</button>
+    </form>
+{{end}}

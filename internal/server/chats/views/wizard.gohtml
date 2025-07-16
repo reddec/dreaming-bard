@@ -1,0 +1,71 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/chats.wizardParams */}}
+{{define "main"}}
+    <form method="post" action="." id="create">
+        {{with .Prompt.Content}}
+            <article>
+                <fieldset>
+                    <label>Draft prompt</label>
+                    <p>{{. | markdown}}</p>
+                    <input type="hidden" name="draft" value="{{.}}">
+                </fieldset>
+            </article>
+        {{end}}
+    </form>
+    <style>
+        .dw-grid-3 > article {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dw-grid-3 > article > main {
+            flex-grow: 1;
+        }
+
+        .row-info {
+            display: flex;
+        }
+
+        .row-info > :first-child {
+            writing-mode: vertical-rl;
+            text-align: center;
+            padding: var(--pico-spacing);
+            margin-left: 0;
+            margin-right: var(--pico-block-spacing-horizontal);
+            margin-bottom: var(--pico-block-spacing-vertical);
+            border-radius: var(--pico-border-radius);
+        }
+
+        .row-info > :not(:first-child) {
+            flex-grow: 1;
+        }
+    </style>
+    {{range $group := .Group}}
+        <div class="row-info">
+            <h4 class="pico-background-zinc-{{sub 9 $group.Order }}00">{{$group.Purpose}}</h4>
+            <div class="dw-grid-3">
+                {{range .Roles}}
+                    <article>
+                        <header style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+                            <a href="/roles/{{.ID}}/">{{or .Name .ID}}</a>
+                        </header>
+                        <main>
+                            <details>
+                                <summary>{{.System | firstLine}}</summary>
+                                {{.System | markdown}}
+                            </details>
+                        </main>
+                        <footer>
+                            {{with .Model}}
+                                <small style="font-size: x-small">{{.}}</small>
+                            {{end}}
+                            <button type="submit" form="create" name="role" value="{{.ID}}">Chat</button>
+                        </footer>
+                    </article>
+                {{end}}
+            </div>
+        </div>
+        {{if eq $group.Purpose "write"}}
+            <hr/>
+        {{end}}
+    {{end}}
+{{end}}

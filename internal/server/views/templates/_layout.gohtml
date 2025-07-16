@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/pico.colors.min.css">
+    <script src="/static/js/htmx.min.js"></script>
+    <title>Dreaming Bard</title>
+    <style>
+        .dw-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .dw-grid-3 {
+                grid-template-columns: 100%;
+            }
+
+            .hide-on-mobile {
+                display: none;
+            }
+        }
+
+
+        .between {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .between > * {
+            display: block;
+            margin: 0;
+            flex-grow: 0;
+            width: auto !important;
+        }
+
+        .no-v-pad li {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        .big-on-mobile {
+            @media (max-width: 768px) {
+                font-size: 1.8em;
+            }
+
+        }
+
+        .note-info {
+            border-left: calc(var(--pico-spacing) / 2) solid var(--pico-color-blue-500);
+            border-radius: var(--pico-border-radius);
+            padding: calc(var(--pico-spacing) / 2);
+            background-color: var(--pico-color-slate-850);
+            color: var(--pico-color-slate-250);
+        }
+
+        #main-menu > ul {
+
+            @media (max-width: 768px) {
+                flex-grow: 1;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            @media (min-width: 768px) {
+                li:not(:first-child) {
+                    margin-left: calc(1.5 * var(--pico-spacing));
+                }
+            }
+        }
+
+        .small-borderless-button {
+            padding: calc(var(--pico-spacing) / 4) !important;
+            border: none !important;
+        }
+    </style>
+    <!-- bless this guy https://stackoverflow.com/a/431554/1195316 -->
+    <noscript>
+        <style>
+            .js-only {
+                display: none !important;
+            }
+        </style>
+    </noscript>
+</head>
+<body>
+{{block "body" .}}
+    <main class="container">
+        {{template "menu"}}
+
+        {{block "main" .}}{{end}}
+    </main>
+{{end}}
+</body>
+</html>
+{{- define "menu"}}
+    <nav id="main-menu">
+        <ul>
+            <li><a href="/" class="big-on-mobile">{{template "icon" "home"}}
+                    <span class="hide-on-mobile"> Home</span></a></li>
+            <li><a href="/chats/" class="big-on-mobile">{{template "icon" "messages"}}
+                    <span class="hide-on-mobile"> Chats</span></a>
+            </li>
+            <li><a href="/prompts/" class="big-on-mobile">{{template "icon" "message-circle-plus"}}
+                    <span class="hide-on-mobile"> Prompts</span></a>
+            </li>
+            <li><a href="/context/" class="big-on-mobile">{{template "icon" "brand-databricks"}}
+                    <span class="hide-on-mobile"> Context</span></a>
+            </li>
+            <li><a href="/pages/" class="big-on-mobile">{{template "icon" "book"}}
+                    <span class="hide-on-mobile"> Pages</span></a>
+            </li>
+            <li><a href="/blueprints/" class="big-on-mobile">{{template "icon" "desk"}}
+                    <span class="hide-on-mobile"> Blueprints</span></a>
+            </li>
+            <li><a href="/roles/" class="big-on-mobile">{{template "icon" "robot"}}
+                    <span class="hide-on-mobile"> Roles</span></a>
+            </li>
+        </ul>
+    </nav>
+{{- end}}
+{{- define "createThread"}}
+    <a href="/chats/new">New thread</a>
+{{- end}}
+{{- define "toolSelector"}}
+    <fieldset>
+        <legend>Tools</legend>
+        <div role="group">
+            <button type="button" data-role="all">all</button>
+            <button type="button" data-role="read-only" class="contrast">read-only</button>
+            <button type="button" class="secondary" data-role="none">none</button>
+        </div>
+        <div class="dw-grid-3">
+            {{range .}}
+                {{/* gotype: github.com/reddec/dreaming-bard/internal/llm.Function*/}}
+
+                <label>
+                    <input type="checkbox" name="tool" value="{{.Name}}" {{if .IsReadOnly}}checked{{end}}>
+                    <abbr title="{{.Description}}">{{.Name}}</abbr>
+                </label>
+            {{end}}
+        </div>
+        <script>
+            (function (root) {
+                const readOnly = [ {{range .}}{{if .IsReadOnly}}{{.Name}},{{end}}{{end}} ];
+                root.querySelector('button[data-role="read-only"]').addEventListener('click', function () {
+                    root.querySelectorAll('input[name="tool"]').forEach(function (el) {
+                        el.checked = readOnly.includes(el.value);
+                    })
+                })
+                root.querySelector('button[data-role="all"]').addEventListener('click', function () {
+                    root.querySelectorAll('input[name="tool"]').forEach(function (el) {
+                        el.checked = true
+                    })
+                })
+                root.querySelector('button[data-role="none"]').addEventListener('click', function () {
+                    root.querySelectorAll('input[name="tool"]').forEach(function (el) {
+                        el.checked = false
+                    })
+                })
+            })(document.currentScript.parentElement)
+        </script>
+    </fieldset>
+{{- end}}
+{{- define "factSelector"}}
+
+    <fieldset>
+        <div role="group">
+            <button type="button" data-role="selectAll">all</button>
+            <button type="button" class="secondary" data-role="selectNone">none</button>
+        </div>
+        <div class="dw-grid-3">
+            {{range .}}
+                {{/* gotype: github.com/reddec/dreaming-bard/internal/dbo.Context*/}}
+                {{ if not .Archived}}
+                    <label>
+                        <input type="checkbox" name="fact" value="{{.ID}}">
+                        {{.Title}}
+                    </label>
+                {{end}}
+            {{end}}
+        </div>
+        <script>
+            (function (root) {
+                root.querySelector("button[data-role=selectAll]").onclick = function () {
+                    root.querySelectorAll("input[name=fact]").forEach(function (el) {
+                        el.checked = true;
+                    });
+                };
+                root.querySelector("button[data-role=selectNone]").onclick = function () {
+                    root.querySelectorAll("input[name=fact]").forEach(function (el) {
+                        el.checked = false;
+                    });
+                };
+            })(document.currentScript.parentElement)
+        </script>
+    </fieldset>
+{{- end}}
+{{- define "icon" -}}
+    <svg style="display: inline;width: 1em; height: 1em" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <use href="/static/img/{{.}}.svg?r={{sessionID}}#icon"></use>
+    </svg>
+{{- end -}}
+{{- define "date-time" -}}
+    <small>
+        <i>
+            <time
+                    title="created: {{ .CreatedAt.UTC.Format "2006-01-02 15:04:05.000 MST"}}, updated: {{ .UpdatedAt.UTC.Format "2006-01-02 15:04:05.000 MST"}}"
+                    datetime="{{(or .UpdatedAt .CreatedAt).Format "2006-01-02T15:04:05-07:00"}}">
+
+                {{  (or .UpdatedAt .CreatedAt).Format "Monday, 02 January 2006 15:04:05 MST"}}
+                {{- if not (.CreatedAt.Equal .UpdatedAt)}}
+                    (updated {{.UpdatedAt | ago}} ago)
+                {{- end}}
+            </time>
+        </i>
+    </small>
+{{- end -}}
+{{- define "help-panel"}}
+    {{if .show}}
+        <div class="note-info">
+            <form method="post" action="help" style="float: right">
+                <button class="outline secondary small-borderless-button" name="{{.name}}" value="false">
+                    {{template "icon" "square-rounded-x"}}
+                </button>
+            </form>
+
+            {{block "help-message" .}}
+            {{end}}
+        </div>
+    {{else}}
+        <form method="post" action="help">
+            <button class="outline small-borderless-button" name="{{.name}}" value="true">
+                <small>{{template "icon" "help-square-rounded"}} help</small>
+            </button>
+        </form>
+    {{end}}
+{{- end -}}

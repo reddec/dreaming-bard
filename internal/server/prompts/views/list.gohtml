@@ -1,0 +1,112 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/prompts.listParams */}}
+{{define "help-message"}}
+    <b>Prompts</b> are ready-to-use conversation templates for starting new LLM chats. Each prompt includes a pre-selected
+    model (<b>Role</b>) and a prefilled draft message—helping you quickly begin specific tasks like writing a page,
+    brainstorming ideas, or crafting new context cards.
+{{end}}
+{{define "main"}}
+    <style>
+        .dw-grid-3 > article {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dw-grid-3 > article > main {
+            flex-grow: 1;
+        }
+
+        .borderless-button {
+            border: none;
+            background: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <article>
+        <nav aria-label="breadcrumb" style="--pico-nav-breadcrumb-divider: '/';">
+            <ul class="no-v-pad">
+                <li><a href="./new">New</a></li>
+                <li><a href="./export">Export</a></li>
+                <li><a href="./import">Import</a></li>
+            </ul>
+        </nav>
+    </article>
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_prompt" ) }}
+    <br/>
+    <main id="prompts">
+        {{with .Pinned}}
+            <div class="dw-grid-3">
+                {{range $prompt := .}}
+                    {{template "showPrompt" $prompt}}
+                {{end}}
+            </div>
+            <hr/>
+        {{end}}
+        {{with .Unpinned}}
+            <div class="dw-grid-3">
+                {{range $prompt := .}}
+                    {{template "showPrompt" $prompt}}
+                {{end}}
+            </div>
+        {{end}}
+    </main>
+{{end}}
+{{define "showPrompt"}}
+    {{with .Prompt}}
+        <article id="p{{.ID}}">
+            <header style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+                            <span>
+                                {{.Summary | firstLine}}
+                            </span>
+                <form method="POST"
+                      hx-post="./{{.ID}}/pin"
+                      hx-target="#prompts"
+                      hx-select="#prompts"
+                      hx-swap="outerHTML"
+                      action="./{{.ID}}/pin"
+                      style="height: auto; display: flex; align-items: center; margin: 0; padding: 0;">
+                    {{if .PinnedAt}}
+                        <button class="borderless-button pico-color-yellow-500" type="submit" name="pin"
+                                value="false">
+                            {{template "icon" "pinned"}}
+
+                        </button>
+                    {{else}}
+                        <button class="borderless-button" type="submit" name="pin"
+                                value="true">
+                            {{template "icon" "pin"}}
+                        </button>
+                    {{end}}
+                </form>
+            </header>
+            <main>
+                <form method="POST" action="/chats/">
+                    <input type="hidden" name="role" value="{{.RoleID}}">
+                    <label>
+                        <button type="submit" name="draft" value="{{.Content}}">
+                            {{template "icon" "message-circle-plus"}} start chat
+                        </button>
+                        <small>by {{template "icon" "robot"}} <a
+                                    href="/roles/{{$.RoleID}}/">{{$.RoleName}}</a></small>
+                    </label>
+                </form>
+
+            </main>
+            <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+                <a href="./{{.ID}}/export">
+                    {{template "icon" "download"}}
+                </a>
+                <div>
+                    <a class="pico-color-green-500"
+                       href="./{{.ID}}/?edit=true">{{template "icon" "edit"}}</a>
+                    &nbsp;
+                    <a href="" class="js-only pico-color-red-600" hx-delete="./{{.ID}}/?stay=true"
+                       hx-confirm="Are you sure you want to delete this prompt?"
+                       hx-target="#p{{.ID}}" hx-swap="outerHTML">
+                        {{template "icon" "trash"}}
+                    </a>
+                </div>
+            </footer>
+        </article>
+    {{end}}
+{{end}}

@@ -1,0 +1,48 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/contexts.importParams */}}
+{{define "main"}}
+    <article>
+        <header>
+            <h3>Upload multiple files</h3>
+        </header>
+        <form method="post" action="upload" enctype="multipart/form-data">
+            <fieldset class="grid">
+                <label>
+                    Files
+                    <input type="file" multiple name="file" accept=".md, .MD, text/markdown, text/*">
+                    <small>Title from frontmatter or base file name will be used for fact name</small>
+                </label>
+            </fieldset>
+            <fieldset class="grid">
+                <label>
+                    Remove <code>#tags</code>
+                    <input type="checkbox" name="removeTags" value="true" checked>
+                </label>
+                <label>
+                    Replace <code>![[ref]]</code> to <code>See ref</code>
+                    <input type="checkbox" name="removeInlineWiki" value="true" checked>
+                </label>
+                <label>
+                    Replace <code>[[ref]]</code> to <code>ref</code>
+                    <input type="checkbox" name="removeWikiLinks" value="true" checked>
+                </label>
+            </fieldset>
+            <button type="submit">Upload</button>
+        </form>
+    </article>
+
+
+    <article>
+        <header>
+            <h3>Import archive</h3>
+        </header>
+        <form method="post" action="import" enctype="multipart/form-data">
+            <fieldset class="grid">
+                <label>
+                    Archive
+                    <input type="file" name="archive" accept=".zip, .ZIP, application/zip">
+                </label>
+            </fieldset>
+            <button type="submit">import</button>
+        </form>
+    </article>
+{{end}}

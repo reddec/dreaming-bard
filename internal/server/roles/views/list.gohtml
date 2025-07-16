@@ -1,0 +1,94 @@
+{{/* gotype: github.com/reddec/dreaming-bard/internal/server/roles.listParams */}}
+{{define "help-message"}}
+    <b>Roles</b> are pre-configured AI (LLM) presets, each designed for specific tasks. Every role combines a unique system
+    prompt, selected model, and specialized purpose—whether it's planning projects, writing content, or summarizing
+    documents.
+{{end}}
+{{define "main"}}
+    <article>
+        <nav aria-label="breadcrumb" style="--pico-nav-breadcrumb-divider: '/';">
+            <ul class="no-v-pad">
+                <li><a href="./new">New</a></li>
+                <li><a href="./export">Export</a></li>
+                <li><a href="./import">Import</a></li>
+            </ul>
+        </nav>
+    </article>
+
+    <style>
+        .dw-grid-3 > article {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dw-grid-3 > article > main {
+            flex-grow: 1;
+        }
+
+        .row-info {
+            display: flex;
+        }
+
+        .row-info > :first-child {
+            writing-mode: vertical-rl;
+            text-align: center;
+            padding: var(--pico-spacing);
+            margin-left: 0;
+            margin-right: var(--pico-block-spacing-horizontal);
+            margin-bottom: var(--pico-block-spacing-vertical);
+            border-radius: var(--pico-border-radius);
+        }
+
+        .row-info > :not(:first-child) {
+            flex-grow: 1;
+        }
+    </style>
+
+    {{template "help-panel" (dict "show" .ShowHelp "name" "help_role" ) }}
+    <br/>
+    {{range $group := .Group}}
+        <div class="row-info">
+            <h4 class="pico-background-zinc-{{sub 9 $group.Order }}00">{{$group.Purpose}}</h4>
+            <div class="dw-grid-3">
+                {{range .Roles}}
+                    <article id="r{{.ID}}">
+                        <header style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+                            <a href="./{{.ID}}/">{{or .Name .ID}}</a>
+                            <a href="./{{.ID}}/?edit=true">
+                                {{template "icon" "edit"}}
+                            </a>
+                        </header>
+                        <main>
+                            {{with .System}}
+                                <details>
+                                    <summary>{{. | firstLine}}</summary>
+                                    {{. | markdown}}
+                                </details>
+                            {{else}}
+                                <small style="text-align: center; display: block;">
+                                    <i>(no system prompt)</i>
+                                </small>
+                            {{end}}
+                        </main>
+                        {{with .Model}}
+                            <small style="font-size: x-small">{{.}}</small>
+                        {{end}}
+                        <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+                            <a href="./{{.ID}}/export">
+                                {{template "icon" "download"}}
+                            </a>
+                            <a href="" class="js-only pico-color-red-600" hx-delete="./{{.ID}}/?stay=true"
+                               hx-confirm="Are you sure you want to delete this role {{.Name}}?"
+                               hx-target="#r{{.ID}}" hx-swap="outerHTML">
+                                {{template "icon" "trash"}}
+                            </a>
+                        </footer>
+                    </article>
+                {{end}}
+            </div>
+        </div>
+        {{if eq $group.Purpose "write"}}
+            <hr/>
+        {{end}}
+    {{end}}
+{{end}}
