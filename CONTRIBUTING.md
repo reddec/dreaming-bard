@@ -9,6 +9,19 @@ Key moments:
   practice.
 - Nothing is dogma: have a better idea? Suggest, but if you have PoC it will be even better.
 
+## Development environment
+
+- latest [Go](https://go.dev/) (see `go.mod` for the exact version)
+- [GoReleaser](https://goreleaser.com/)
+- [SQLC](https://sqlc.dev/)
+- python 3.10+ for code generation
+- make, shell, git, git-lfs, sed
+
+Optionally
+
+- [direnv](https://direnv.net/): put your secrets and envs in `.env` file which is ignored by git
+
+
 ## How-to
 
 ### Add icon
