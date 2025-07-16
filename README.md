@@ -299,6 +299,7 @@ No SSO-[tax](http://sso.tax/). Anyway, it's single-tenant.
 ## TLS
 
 Yes, it has. No, there is no integration with Let's encrypt & co.
+
 **Configuration:**
 
 | ENV             | Default value      | Description      |
