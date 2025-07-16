@@ -15,6 +15,8 @@ It has some number of interesting features:
 - You can save (and pin) pre-filled chat templates: they are called "Prompts".
 - You can plan the next page using **"Blueprints"**: a combination of page outline, linked context and pages to generate
   a new page.
+    - Draft can be automatically converted to outline
+    - Each story beat can be automatically enhanced
 - A final book can be exported as ePub
 - Almost everything can be imported or exported as plain Markdown files
 
@@ -72,10 +74,9 @@ of AI/LLM frameworks to understand better how LLM works and how it handles conte
 
 (not the only way, but most trivial)
 
-- Get [docker](https://docs.docker.com/get-started/get-docker/) 
+- Get [docker](https://docs.docker.com/get-started/get-docker/)
 - Get API key from [https://openai.com/]
 - Run
-
 
 ```shell
 docker run -v "$(pwd):/data" \
@@ -87,6 +88,13 @@ docker run -v "$(pwd):/data" \
 
 - Open http://localhost:8080
 
+## Gallery
+
+|                                           |                                               |
+|-------------------------------------------|-----------------------------------------------|
+| Main page ![](_docs/img/screen_home.png)  | Roles ![](_docs/img/screen_roles.png)         |
+| Context ![](_docs/img/screen_context.png) | Blueprint ![](_docs/img/screen_blueprint.png) |
+| Prompts ![](_docs/img/screen_prompts.png) | Chat ![](_docs/img/screen_chat.png)           |
 
 ## Installation
 
