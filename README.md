@@ -2,7 +2,7 @@
 
 **Dreaming Bard** is your assistant to create long books/stories/documents.
 
-The goal is to research about long LLM context and test solutions which can help maintain conversations.
+The goal is to **research** about long LLM context and test solutions which can help maintain conversations.
 
 The ultimate goal - to be able to write a standard-length novel book: around 65k-80k words. And do it without a hole in
 your pocket.
@@ -68,6 +68,24 @@ Once upon a time I realized that there are not enough books of type (not __that_
 It started as a research project to handle long (hundreds pages) book writing. It's intentionally not using any kind
 of AI/LLM frameworks to understand better how LLM works and how it handles context.
 
+## Quick start
+
+(not the only way, but most trivial)
+
+- Get [docker](https://docs.docker.com/get-started/get-docker/) 
+- Get API key from [https://openai.com/]
+- Run
+
+
+    docker run -v "$(pwd):/data" \
+      --rm -p 8080:8080 \
+      -e PROVIDER_TYPE=openai \
+      -e PROVIDER_OPENAI_TOKEN=sk-SUPER-SECRET-TOKEN \
+      ghcr.io/reddec/dreaming-bard:latest
+
+- Open http://localhost:8080
+
+
 ## Installation
 
 - [Binary releases](https://github.com/reddec/dreaming-bard/releases/latest) for all major platforms
@@ -81,9 +99,7 @@ Web interface available via http://localhost:8080
 
 ### Docker
 
-    docker run -p 8080:8080 ghcr.io/reddec/dreaming-bard:latest
-
-Do not to forget eventually persist `/data`.
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 ghcr.io/reddec/dreaming-bard:latest
 
 ### Docker Compose
 
@@ -95,7 +111,6 @@ Do not to forget eventually persist `/data`.
 (download from releases or build it by yourself)
 
     dreaming-bard server
-
 
 <details>
 <summary>See full CLI reference</summary>
@@ -168,18 +183,18 @@ This is the default provider. You have to download models before you can use the
 
 **Configuration:**
 
-| ENV                            | Default value            | Description         |
-|--------------------------------|--------------------------|---------------------|
-| `PROVIDER_OLLAMA_URL`          | `http://localhost:11434` | Ollama URL          |
-| `PROVIDER_OLLAMA_MODEL`        | `qwen3:14b`              | Default model name  |
-| `PROVIDER_OLLAMA_TIMEOUT`      | `120s`                   | Timeout             |
-| `PROVIDER_OLLAMA_CONTEXT_SIZE` | `32768`                  | Context size        |
-| `PROVIDER_OLLAMA_MAX_TOKENS`   | `32768`                  | Max tokens          |
-| `PROVIDER_OLLAMA_TEMPERATURE`  | `0.6`                    | Temperature         |
-| `PROVIDER_OLLAMA_TOP_P`        | `0.95`                   | Top P               |
-| `PROVIDER_OLLAMA_TOP_K`        | `20`                     | Top K               |
-| `PROVIDER_OLLAMA_MIN_P`        | `0`                      | Min P               |
-| `PROVIDER_OLLAMA_NO_THINK`     | `false`                  | Disable thinking    |
+| ENV                            | Default value            | Description        |
+|--------------------------------|--------------------------|--------------------|
+| `PROVIDER_OLLAMA_URL`          | `http://localhost:11434` | Ollama URL         |
+| `PROVIDER_OLLAMA_MODEL`        | `qwen3:14b`              | Default model name |
+| `PROVIDER_OLLAMA_TIMEOUT`      | `120s`                   | Timeout            |
+| `PROVIDER_OLLAMA_CONTEXT_SIZE` | `32768`                  | Context size       |
+| `PROVIDER_OLLAMA_MAX_TOKENS`   | `32768`                  | Max tokens         |
+| `PROVIDER_OLLAMA_TEMPERATURE`  | `0.6`                    | Temperature        |
+| `PROVIDER_OLLAMA_TOP_P`        | `0.95`                   | Top P              |
+| `PROVIDER_OLLAMA_TOP_K`        | `20`                     | Top K              |
+| `PROVIDER_OLLAMA_MIN_P`        | `0`                      | Min P              |
+| `PROVIDER_OLLAMA_NO_THINK`     | `false`                  | Disable thinking   |
 
 ### OpenAI
 
@@ -206,14 +221,14 @@ specify the provider's endpoint by setting the `PROVIDER_OPENAI_URL` environment
 
 OpenAI
 
-    docker run -p 8080:8080 \
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 \
       -e PROVIDER_TYPE=openai \
       -e PROVIDER_OPENAI_TOKEN=sk-SUPER-SECRET-TOKEN \
       ghcr.io/reddec/dreaming-bard:latest
 
 DeepInfra
 
-    docker run -p 8080:8080 \
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 \
       -e PROVIDER_TYPE=openai \
       -e PROVIDER_OPENAI_URL=https://api.deepinfra.com/v1/openai
       -e PROVIDER_OPENAI_TOKEN=SUPER-SECRET-TOKEN \
@@ -221,7 +236,7 @@ DeepInfra
 
 OpenRouter
 
-    docker run -p 8080:8080 \
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 \
       -e PROVIDER_TYPE=openai \
       -e PROVIDER_OPENAI_URL=https://openrouter.ai/api/v1
       -e PROVIDER_OPENAI_TOKEN=SUPER-SECRET-TOKEN \
@@ -251,18 +266,50 @@ This provider uses the Google AI (Gemini) API. You will need to obtain an API ke
 | `PROVIDER_GEMINI_THRESHOLD_SEXUALLY_EXPLICIT` | `NONE`             | Explicit content threshold  |
 | `PROVIDER_GEMINI_THRESHOLD_DANGEROUS_CONTENT` | `NONE`             | Dangerous content threshold |
 
-
-
 **Example:**
 
-    docker run -p 8080:8080 \
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 \
       -e PROVIDER_TYPE=gemini \
       -e PROVIDER_GEMINI_TOKEN=A-super-secret-x \
       ghcr.io/reddec/dreaming-bard:latest
+
+## OIDC and SSO
+
+No SSO-[tax](http://sso.tax/). Anyway, it's single-tenant.
+
+**Configuration:**
+
+| ENV                  | Default value | Description                      |
+|----------------------|---------------|----------------------------------|
+| `OIDC_ENABLED`       | `false`       | Enable OIDC                      |
+| `OIDC_ISSUER`        |               | Issuer URL                       |
+| `OIDC_CLIENT_ID`     |               | Client ID                        |
+| `OIDC_CLIENT_SECRET` |               | Client secret                    |
+| `OIDC_GC`            | `5m`          | GC interval for expired sessions |
+
+**Example**
+
+    docker run --rm -v "$(pwd):/data" -p 8080:8080 \
+      -e OIDC_ENABLED=true \
+      -e OIDC_ISSUER=https://zitadel.example.com \
+      -e OIDC_CLIENT_ID=my-client-id \
+      -e OIDC_CLIENT_SECRET=aaaaafooobaaar \
+      ghcr.io/reddec/dreaming-bard:latest
+
+## TLS
+
+Yes, it has. No, there is no integration with Let's encrypt & co.
+**Configuration:**
+
+| ENV             | Default value      | Description      |
+|-----------------|--------------------|------------------|
+| `TLS_ENABLED`   | `false`            | Enable TLS       |
+| `TLS_KEY_FILE`  | `/etc/tls/tls.key` | Key file         |
+| `TLS_CERT_FILE` | `/etc/tls/tls.crt` | Certificate file |
 
 ## License
 
 GPLv3 - See [LICENSE](LICENSE) for full terms.
 
-**TL;DR**: Use Dreaming-Bard freely as a service. 
+**TL;DR**: Use Dreaming-Bard freely as a service.
 If you modify it or include its code in your project, you must open-source those parts under GPLv3.
