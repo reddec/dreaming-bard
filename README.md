@@ -77,13 +77,13 @@ of AI/LLM frameworks to understand better how LLM works and how it handles conte
 - Run
 
 
-
-    docker run -v "$(pwd):/data" \
-      --rm -p 8080:8080 \
-      -e PROVIDER_TYPE=openai \
-      -e PROVIDER_OPENAI_TOKEN=sk-SUPER-SECRET-TOKEN \
-      ghcr.io/reddec/dreaming-bard:latest
-
+```shell
+docker run -v "$(pwd):/data" \
+  --rm -p 8080:8080 \
+  -e PROVIDER_TYPE=openai \
+  -e PROVIDER_OPENAI_TOKEN=sk-SUPER-SECRET-TOKEN \
+  ghcr.io/reddec/dreaming-bard:latest
+```
 
 - Open http://localhost:8080
 
