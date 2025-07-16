@@ -78,6 +78,28 @@ of AI/LLM frameworks to understand better how LLM works and how it handles conte
 
 ## Run
 
+Web interface available via http://localhost:8080 
+
+### Docker
+
+  docker run -p 8080:8080 ghcr.io/reddec/dreaming-bard:latest
+
+Do not to forget eventually persist `/data`.
+
+
+### Docker Compose
+
+- Download [docker-compose.yaml](docker-compose.yaml)
+- In the directory: `docker compose up`
+
+
+### CLI
+
+(download from releases or build it by yourself)
+
+  dreaming-bard server
+
+
 <details>
 <summary>See full CLI reference</summary>
 
